@@ -1,0 +1,39 @@
+name = "yestr-face"
+main = "src/index.ts"
+compatibility_date = "2024-01-15"
+account_id = "YOUR_ACCOUNT_ID"
+
+# Worker configuration
+[triggers]
+crons = ["*/5 * * * *"]  # Run profile scanner every 5 minutes
+
+# R2 bucket binding
+[[r2_buckets]]
+binding = "AVATAR_BUCKET"
+bucket_name = "yestr-avatars"
+
+# KV namespace binding
+[[kv_namespaces]]
+binding = "PROFILE_KV"
+id = "YOUR_KV_NAMESPACE_ID"
+
+# Durable Objects (optional, for rate limiting)
+# [[durable_objects.bindings]]
+# name = "RATE_LIMITER"
+# class_name = "RateLimiter"
+
+# Environment variables
+[vars]
+RELAY_URL = "wss://relay.yestr.social"
+MAX_IMAGE_SIZE = "10485760"  # 10MB
+IMAGE_CACHE_DURATION = "604800"  # 7 days in seconds
+DEFAULT_CACHE_CONTROL = "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800"
+ALLOWED_IMAGE_TYPES = "image/jpeg,image/png,image/webp,image/gif"
+
+# Development environment
+[env.development]
+vars = { ENVIRONMENT = "development", LOG_LEVEL = "debug" }
+
+# Production environment
+[env.production]
+vars = { ENVIRONMENT = "production", LOG_LEVEL = "info" }

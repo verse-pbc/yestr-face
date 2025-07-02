@@ -1,0 +1,36 @@
+{
+  "name": "yestr-face",
+  "version": "1.0.0",
+  "description": "Profile picture proxy server for Yestr app using Cloudflare Workers and R2",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest",
+    "test:ci": "vitest run",
+    "format": "prettier --write .",
+    "lint": "eslint . --ext .ts,.tsx",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "nostr",
+    "cloudflare-workers",
+    "r2",
+    "image-proxy"
+  ],
+  "author": "Yestr Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240117.0",
+    "@typescript-eslint/eslint-plugin": "^6.19.1",
+    "@typescript-eslint/parser": "^6.19.1",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.2",
+    "wrangler": "^3.28.2"
+  },
+  "dependencies": {
+    "nostr-tools": "^2.1.8"
+  }
+}
