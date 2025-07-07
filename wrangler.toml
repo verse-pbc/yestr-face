@@ -1,7 +1,7 @@
 name = "yestr-face"
 main = "src/index.ts"
 compatibility_date = "2024-01-15"
-account_id = "YOUR_ACCOUNT_ID"
+account_id = "c84e7a9bf7ed99cb41b8e73566568c75"
 
 # Worker configuration
 [triggers]
@@ -15,7 +15,7 @@ bucket_name = "yestr-avatars"
 # KV namespace binding
 [[kv_namespaces]]
 binding = "PROFILE_KV"
-id = "YOUR_KV_NAMESPACE_ID"
+id = "0307d85441fb437c8c78fe88540c9224"
 
 # Durable Objects (optional, for rate limiting)
 # [[durable_objects.bindings]]
@@ -37,3 +37,6 @@ vars = { ENVIRONMENT = "development", LOG_LEVEL = "debug" }
 # Production environment
 [env.production]
 vars = { ENVIRONMENT = "production", LOG_LEVEL = "info" }
+
+[observability.logs]
+enabled = true
