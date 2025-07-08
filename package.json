@@ -22,13 +22,16 @@
   "license": "MIT",
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240117.0",
+    "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^6.19.1",
     "@typescript-eslint/parser": "^6.19.1",
     "eslint": "^8.56.0",
     "prettier": "^3.2.4",
+    "tsx": "^4.20.3",
     "typescript": "^5.3.3",
     "vitest": "^1.2.2",
-    "wrangler": "^3.28.2"
+    "wrangler": "^3.28.2",
+    "ws": "^8.18.3"
   },
   "dependencies": {
     "file-type-mime": "^0.4.7",

@@ -63,6 +63,46 @@ export class ImageService {
         );
       }
 
+      // Check if we received HTML instead of an image
+      const bytes = new Uint8Array(buffer).slice(0, 20);
+      const isHtml =
+        bytes[0] === 0x3c && // <
+        (bytes[1] === 0x68 || bytes[1] === 0x48) && // h or H
+        (bytes[2] === 0x74 || bytes[2] === 0x54) && // t or T
+        (bytes[3] === 0x6d || bytes[3] === 0x4d) && // m or M
+        (bytes[4] === 0x6c || bytes[4] === 0x4c); // l or L
+
+      if (isHtml) {
+        const htmlContent = new TextDecoder().decode(buffer);
+        console.error('Received HTML instead of image:', htmlContent);
+
+        // Check for common bot protection systems
+        if (htmlContent.includes('sgcaptcha') || htmlContent.includes('/.well-known/sgcaptcha/')) {
+          throw new ImageFetchError(
+            'Image blocked by SiteGround CAPTCHA protection. This domain requires browser verification.',
+            403,
+            url,
+          );
+        }
+
+        if (
+          htmlContent.includes('cf-browser-verification') ||
+          htmlContent.includes('Checking your browser')
+        ) {
+          throw new ImageFetchError(
+            'Image blocked by Cloudflare browser verification. This domain requires browser verification.',
+            403,
+            url,
+          );
+        }
+
+        throw new ImageFetchError(
+          `Server returned HTML instead of image (${buffer.byteLength} bytes). The image host may be blocking automated requests.`,
+          403,
+          url,
+        );
+      }
+
       return buffer;
     } catch (error) {
       if (error instanceof ImageFetchError) {
@@ -81,8 +121,20 @@ export class ImageService {
   }
 
   async validateImage(buffer: ArrayBuffer): Promise<string> {
+    // Debug logging
+    const bytes = new Uint8Array(buffer).slice(0, 16);
+    console.log('Buffer size:', buffer.byteLength);
+    console.log(
+      'First 16 bytes:',
+      Array.from(bytes)
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join(' '),
+    );
+
     // Use file-type-mime library for robust file type detection
     const result = parse(buffer);
+
+    console.log('file-type-mime result:', result);
 
     if (!result) {
       throw new Error('Unknown or invalid image format');
