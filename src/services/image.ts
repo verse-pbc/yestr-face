@@ -1,5 +1,6 @@
 import { ImageFetchError, ProcessedImage, ImageProcessingOptions } from '../types';
 import { getContentTypeFromUrl } from '../utils/validation';
+import { parse } from 'file-type-mime';
 
 export class ImageService {
   constructor(
@@ -80,39 +81,19 @@ export class ImageService {
   }
 
   async validateImage(buffer: ArrayBuffer): Promise<string> {
-    // Check magic bytes to determine actual image type
-    const bytes = new Uint8Array(buffer);
+    // Use file-type-mime library for robust file type detection
+    const result = parse(buffer);
 
-    // JPEG
-    if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
-      return 'image/jpeg';
+    if (!result) {
+      throw new Error('Unknown or invalid image format');
     }
 
-    // PNG
-    if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) {
-      return 'image/png';
+    // Check if it's an image type
+    if (!result.mime.startsWith('image/')) {
+      throw new Error('Not an image file');
     }
 
-    // GIF
-    if (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46) {
-      return 'image/gif';
-    }
-
-    // WebP
-    if (
-      bytes[0] === 0x52 &&
-      bytes[1] === 0x49 &&
-      bytes[2] === 0x46 &&
-      bytes[3] === 0x46 &&
-      bytes[8] === 0x57 &&
-      bytes[9] === 0x45 &&
-      bytes[10] === 0x42 &&
-      bytes[11] === 0x50
-    ) {
-      return 'image/webp';
-    }
-
-    throw new Error('Unknown or invalid image format');
+    return result.mime;
   }
 
   // Basic image processing (no actual resizing in this MVP)
