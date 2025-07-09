@@ -35,3 +35,4 @@ coverage/
 
 # Wrangler state
 .wrangler/
+.claude

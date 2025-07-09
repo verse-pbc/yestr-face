@@ -10,12 +10,12 @@ export function validatePubkey(pubkey: string): boolean {
 
 export function parseAvatarRequest(request: Request, pubkey: string): AvatarRequest {
   const url = new URL(request.url);
-  
+
   // Validate pubkey
   if (!validatePubkey(pubkey)) {
     throw new Error('Invalid pubkey format');
   }
-  
+
   // Parse size parameter
   const sizeParam = url.searchParams.get('size');
   let size: number | undefined;
@@ -25,14 +25,14 @@ export function parseAvatarRequest(request: Request, pubkey: string): AvatarRequ
       size = 400; // Default to medium size
     }
   }
-  
+
   // Parse format parameter
   const formatParam = url.searchParams.get('format');
   let format: 'webp' | 'jpeg' | 'png' | undefined;
   if (formatParam && VALID_FORMATS.includes(formatParam)) {
     format = formatParam as 'webp' | 'jpeg' | 'png';
   }
-  
+
   return { pubkey, size, format };
 }
 

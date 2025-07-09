@@ -5,16 +5,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Common Development Commands
 
 ### Build and Run
+
 - `npm run dev` - Start local development server with Wrangler
 - `npm run deploy` - Deploy to Cloudflare Workers production
 
 ### Testing and Quality
+
 - `npm test` - Run all tests with Vitest
 - `npm run lint` - Run ESLint for code quality checks
 - `npm run format` - Format code with Prettier
 - `npm run type-check` - Run TypeScript type checking
 
 ### Setup and Configuration
+
 - `npm install` - Install dependencies
 - `npx wrangler login` - Authenticate with Cloudflare
 - `npm run setup` - Run interactive setup script for first-time configuration
@@ -53,6 +56,7 @@ Yestr Face is a profile picture proxy server built on Cloudflare Workers that so
 ### Environment Configuration
 
 Key settings in `wrangler.toml`:
+
 - `RELAY_URL`: Default Nostr relay (wss://relay.yestr.social)
 - `MAX_IMAGE_SIZE`: 10MB limit
 - `IMAGE_CACHE_DURATION`: 604800 seconds (7 days)
@@ -70,6 +74,7 @@ Key settings in `wrangler.toml`:
 ### Testing
 
 Tests use Vitest and cover:
+
 - Utility functions (validation, cache keys)
 - Service logic isolation
 - Run specific test: `npm test -- <test-name>`

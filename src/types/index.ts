@@ -2,21 +2,22 @@
 export interface Env {
   // R2 bucket binding
   AVATAR_BUCKET: R2Bucket;
-  
+
   // KV namespace binding
   PROFILE_KV: KVNamespace;
-  
+
   // Environment variables
   RELAY_URL: string;
   MAX_IMAGE_SIZE: string;
   IMAGE_CACHE_DURATION: string;
   DEFAULT_CACHE_CONTROL: string;
   ALLOWED_IMAGE_TYPES: string;
-  
+
   // Secrets
   R2_ACCESS_KEY_ID?: string;
   R2_SECRET_ACCESS_KEY?: string;
   ALLOWED_ORIGINS?: string;
+  IMAGE_PROXY_SECRET: string;
 }
 
 // Nostr types

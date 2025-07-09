@@ -1,9 +1,7 @@
 import { Env, ProfileMetadata } from '../types';
 
 export class StorageService {
-  constructor(
-    private env: Env,
-  ) {}
+  constructor(private env: Env) {}
 
   // R2 Storage Methods
   async getImage(key: string): Promise<R2ObjectBody | null> {
@@ -55,13 +53,9 @@ export class StorageService {
 
   async putProfileMetadata(metadata: ProfileMetadata): Promise<void> {
     try {
-      await this.env.PROFILE_KV.put(
-        `profile:${metadata.pubkey}`,
-        JSON.stringify(metadata),
-        {
-          expirationTtl: 86400 * 30, // 30 days
-        },
-      );
+      await this.env.PROFILE_KV.put(`profile:${metadata.pubkey}`, JSON.stringify(metadata), {
+        expirationTtl: 86400 * 30, // 30 days
+      });
     } catch (error) {
       console.error(`Error putting profile metadata: ${error}`);
     }
@@ -78,7 +72,7 @@ export class StorageService {
   // Batch operations
   async getProfileMetadataBatch(pubkeys: string[]): Promise<Map<string, ProfileMetadata>> {
     const result = new Map<string, ProfileMetadata>();
-    
+
     // KV doesn't support batch get, so we need to fetch individually
     // In production, consider using Durable Objects for better batch operations
     const promises = pubkeys.map(async (pubkey) => {
@@ -87,7 +81,7 @@ export class StorageService {
         result.set(pubkey, metadata);
       }
     });
-    
+
     await Promise.all(promises);
     return result;
   }
@@ -102,7 +96,7 @@ export class StorageService {
       // Get approximate counts
       const profilesList = await this.env.PROFILE_KV.list({ limit: 1 });
       const imagesList = await this.env.AVATAR_BUCKET.list({ limit: 1 });
-      
+
       return {
         totalProfiles: 0, // KV doesn't provide count
         totalImages: 0, // R2 doesn't provide count in list
@@ -127,7 +121,7 @@ export class StorageService {
   // Helper to track failures
   async recordFailure(pubkey: string, error: string): Promise<void> {
     const metadata = await this.getProfileMetadata(pubkey);
-    
+
     if (metadata) {
       metadata.failureCount = (metadata.failureCount || 0) + 1;
       metadata.lastFailure = Date.now();

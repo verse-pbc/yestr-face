@@ -1,17 +1,20 @@
 # Yestr Face - Profile Picture Proxy Server Development Plan
 
 ## Overview
+
 Yestr Face is a Cloudflare Workers-based proxy server that caches Nostr profile pictures using R2 storage. It queries user profiles from relay.yestr.social, downloads profile pictures, and serves them with proper CORS headers to ensure reliable image loading in the Yestr web application.
 
 ## Architecture
 
 ### Components
+
 1. **Cloudflare Worker** - Main application logic
 2. **R2 Storage** - Object storage for profile pictures
 3. **KV Store** - Metadata storage for profile mappings
 4. **Durable Objects** (optional) - Rate limiting and queue management
 
 ### Data Flow
+
 ```
 1. Worker receives request for profile picture
 2. Check KV store for cached metadata
@@ -30,6 +33,7 @@ Yestr Face is a Cloudflare Workers-based proxy server that caches Nostr profile 
 ### 1. Worker Endpoints
 
 #### GET `/avatar/:pubkey`
+
 - Returns profile picture for given pubkey
 - Parameters:
   - `pubkey`: Nostr public key (hex format)
@@ -37,10 +41,12 @@ Yestr Face is a Cloudflare Workers-based proxy server that caches Nostr profile 
   - `format`: Optional format (webp, jpg, png)
 
 #### POST `/webhook/profile-update`
+
 - Webhook endpoint for profile updates
 - Triggers re-fetch of profile picture
 
 #### GET `/health`
+
 - Health check endpoint
 - Returns worker status and R2 connectivity
 
@@ -48,8 +54,8 @@ Yestr Face is a Cloudflare Workers-based proxy server that caches Nostr profile 
 
 ```typescript
 interface ProfileFetcher {
-  fetchProfile(pubkey: string): Promise<NostrProfile>
-  subscribeToProfiles(): AsyncGenerator<NostrProfile>
+  fetchProfile(pubkey: string): Promise<NostrProfile>;
+  subscribeToProfiles(): AsyncGenerator<NostrProfile>;
 }
 ```
 
@@ -62,9 +68,9 @@ interface ProfileFetcher {
 
 ```typescript
 interface ImageProcessor {
-  downloadImage(url: string): Promise<ArrayBuffer>
-  optimizeImage(buffer: ArrayBuffer, options: ImageOptions): Promise<ProcessedImage>
-  generateSizes(image: ProcessedImage): Promise<ImageSizeMap>
+  downloadImage(url: string): Promise<ArrayBuffer>;
+  optimizeImage(buffer: ArrayBuffer, options: ImageOptions): Promise<ProcessedImage>;
+  generateSizes(image: ProcessedImage): Promise<ImageSizeMap>;
 }
 ```
 
@@ -77,6 +83,7 @@ interface ImageProcessor {
 ### 4. Storage Layer
 
 #### R2 Storage Structure
+
 ```
 /avatars/
   /{pubkey}/
@@ -87,35 +94,39 @@ interface ImageProcessor {
 ```
 
 #### KV Store Schema
+
 ```typescript
 interface ProfileMetadata {
-  pubkey: string
-  originalUrl: string
+  pubkey: string;
+  originalUrl: string;
   sizes: {
     [size: string]: {
-      key: string
-      contentType: string
-      lastModified: number
-    }
-  }
-  fetchedAt: number
-  profileUpdatedAt: number
+      key: string;
+      contentType: string;
+      lastModified: number;
+    };
+  };
+  fetchedAt: number;
+  profileUpdatedAt: number;
 }
 ```
 
 ### 5. Background Jobs
 
 #### Profile Scanner
+
 - Runs on cron schedule (every 5 minutes)
 - Queries relay for recent profile updates
 - Queues profiles for image processing
 
 #### Image Refresh Job
+
 - Runs daily
 - Checks for stale images (>7 days old)
 - Re-fetches updated profile pictures
 
 #### Cleanup Job
+
 - Runs weekly
 - Removes orphaned images
 - Cleans up failed downloads
@@ -171,6 +182,7 @@ interface ProfileMetadata {
 ## Development Phases
 
 ### Phase 1: MVP (Week 1)
+
 - [x] Project setup with Wrangler
 - [ ] Basic Worker with health endpoint
 - [ ] R2 integration for image storage
@@ -178,18 +190,21 @@ interface ProfileMetadata {
 - [ ] Basic image proxy functionality
 
 ### Phase 2: Image Processing (Week 2)
+
 - [ ] Image download with retry logic
 - [ ] Image format validation
 - [ ] Basic image optimization
 - [ ] Multiple size generation
 
 ### Phase 3: Caching & Performance (Week 3)
+
 - [ ] KV store for metadata
 - [ ] Cache headers implementation
 - [ ] Request coalescing
 - [ ] Background job scheduler
 
 ### Phase 4: Production Ready (Week 4)
+
 - [ ] Rate limiting
 - [ ] Monitoring and analytics
 - [ ] Error handling and recovery
@@ -232,6 +247,7 @@ interface ProfileMetadata {
 ## Configuration
 
 ### Environment Variables
+
 ```
 RELAY_URL=wss://relay.yestr.social
 R2_BUCKET_NAME=yestr-avatars

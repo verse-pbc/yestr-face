@@ -31,20 +31,24 @@ npm run deploy
 ## API Endpoints
 
 ### Get Avatar
+
 ```
 GET /avatar/:pubkey
 ```
 
 Query Parameters:
+
 - `size` - Image size (200, 400, 800)
 - `format` - Image format (webp, jpg, png)
 
 Example:
+
 ```
 https://avatars.yestr.app/avatar/e0f6050d930a61323bac4a5b47d58e961da2919834f3f58f3b312c2918852b55?size=400&format=webp
 ```
 
 ### Health Check
+
 ```
 GET /health
 ```

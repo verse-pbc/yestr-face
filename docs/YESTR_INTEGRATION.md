@@ -29,19 +29,19 @@ class AvatarHelper {
     if (originalUrl == null || originalUrl.isEmpty) {
       return '${AppConfig.avatarProxyUrl}/avatar/$pubkey?size=$size';
     }
-    
+
     // Use proxy for all profile pictures
     return '${AppConfig.avatarProxyUrl}/avatar/$pubkey?size=$size';
   }
-  
+
   static String getThumbnail(String pubkey) {
     return getProxyUrl(null, pubkey, size: 200);
   }
-  
+
   static String getMedium(String pubkey) {
     return getProxyUrl(null, pubkey, size: 400);
   }
-  
+
   static String getLarge(String pubkey) {
     return getProxyUrl(null, pubkey, size: 800);
   }
@@ -59,7 +59,7 @@ import '../utils/avatar_helper.dart';
 
 class ProfileCard extends StatelessWidget {
   final NostrProfile profile;
-  
+
   @override
   Widget build(BuildContext context) {
     return CachedNetworkImage(
@@ -115,7 +115,7 @@ Future<void> preloadProfileImages(List<NostrProfile> profiles) async {
       context,
     );
   });
-  
+
   await Future.wait(futures);
 }
 ```
@@ -131,11 +131,13 @@ Future<void> preloadProfileImages(List<NostrProfile> profiles) async {
 ## Migration Strategy
 
 ### Phase 1: Gradual Rollout
+
 1. Update the app to use proxy URLs
 2. Keep original URLs as fallback
 3. Monitor performance and errors
 
 ### Phase 2: Full Migration
+
 1. Remove all CORS workarounds
 2. Use proxy for all profile pictures
 3. Remove fallback logic
@@ -147,7 +149,7 @@ class ProfileImageWidget extends StatelessWidget {
   final String pubkey;
   final String? originalUrl;
   final double size;
-  
+
   @override
   Widget build(BuildContext context) {
     // Phase 1: Try proxy first, fallback to original
@@ -165,7 +167,7 @@ class ProfileImageWidget extends StatelessWidget {
       },
     );
   }
-  
+
   Widget _buildPlaceholder() {
     return Container(
       width: size,
@@ -180,6 +182,7 @@ class ProfileImageWidget extends StatelessWidget {
 ## Monitoring
 
 Track these metrics after integration:
+
 - Image load success rate
 - Average load time
 - Cache hit rate
@@ -188,16 +191,19 @@ Track these metrics after integration:
 ## Troubleshooting
 
 ### Images Not Loading
+
 1. Check if proxy service is healthy: `https://your-proxy/health`
 2. Verify pubkey format (64 character hex)
 3. Check browser console for errors
 
 ### Slow Loading
+
 1. Images are being fetched from original source (first load)
 2. Use smaller sizes for lists (200px)
 3. Implement progressive loading
 
 ### CORS Errors Still Appearing
+
 1. Ensure you're using proxy URLs everywhere
 2. Check that proxy URL is correct
 3. Verify ALLOWED_ORIGINS is configured

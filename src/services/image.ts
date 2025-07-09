@@ -1,4 +1,4 @@
-import { ImageFetchError, ProcessedImage, ImageProcessingOptions } from '../types';
+import { ImageFetchError, ProcessedImage, ImageProcessingOptions, Env } from '../types';
 import { getContentTypeFromUrl } from '../utils/validation';
 import { parse } from 'file-type-mime';
 
@@ -6,9 +6,27 @@ export class ImageService {
   constructor(
     private maxImageSize: number,
     private allowedTypes: string[],
+    private env?: Env,
   ) {}
 
   async fetchImage(url: string): Promise<ArrayBuffer> {
+    try {
+      return await this.fetchImageDirect(url);
+    } catch (error) {
+      // If we have env and proxy secret, and it's a 403 error, try proxy
+      if (
+        this.env?.IMAGE_PROXY_SECRET &&
+        error instanceof ImageFetchError &&
+        error.statusCode === 403
+      ) {
+        console.log('403 error detected, attempting to fetch via proxy');
+        return await this.fetchImageViaProxy(url);
+      }
+      throw error;
+    }
+  }
+
+  private async fetchImageDirect(url: string): Promise<ArrayBuffer> {
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 10000); // 10 second timeout
@@ -117,6 +135,66 @@ export class ImageService {
       }
 
       throw new ImageFetchError('Unknown error fetching image', 500, url);
+    }
+  }
+
+  private async fetchImageViaProxy(url: string): Promise<ArrayBuffer> {
+    if (!this.env?.IMAGE_PROXY_SECRET) {
+      throw new ImageFetchError('Proxy secret not configured', 500, url);
+    }
+
+    const proxyUrl = new URL('https://relay.yestr.social/proxy-image');
+    proxyUrl.searchParams.set('url', url);
+    proxyUrl.searchParams.set('secret', this.env.IMAGE_PROXY_SECRET);
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000); // 15 second timeout for proxy
+
+    try {
+      const response = await fetch(proxyUrl.toString(), {
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'YestrFace/1.0 (https://yestr.social)',
+        },
+      });
+
+      clearTimeout(timeout);
+
+      if (!response.ok) {
+        throw new ImageFetchError(
+          `Proxy failed to fetch image: ${response.status} ${response.statusText}`,
+          response.status,
+          url,
+        );
+      }
+
+      const buffer = await response.arrayBuffer();
+
+      // Validate size
+      if (buffer.byteLength > this.maxImageSize) {
+        throw new ImageFetchError(
+          `Image too large from proxy: ${buffer.byteLength} bytes`,
+          413,
+          url,
+        );
+      }
+
+      return buffer;
+    } catch (error) {
+      clearTimeout(timeout);
+
+      if (error instanceof ImageFetchError) {
+        throw error;
+      }
+
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          throw new ImageFetchError('Proxy fetch timeout', 504, url);
+        }
+        throw new ImageFetchError(`Proxy failed to fetch image: ${error.message}`, 500, url);
+      }
+
+      throw new ImageFetchError('Unknown error fetching image via proxy', 500, url);
     }
   }
 
